@@ -112,24 +112,12 @@
 <p>运行</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 manage.py collectstatic</span><br></pre></td></tr></table></figure>
 <p>生成静态资源文件，默认保存在项目中的static文件夹，可自行拷贝至其他地方，注意文件夹地址与下方nginx的对应配置项一致</p>
-<p>uwsgi.ini配置文件中</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http=0:8001</span><br></pre></td></tr></table></figure>
-<p>改为</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socket= 127.0.0.1:8001</span><br></pre></td></tr></table></figure>
-<p>重启uwsgi服务</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uwsgi --reload uwsgi.pid</span><br></pre></td></tr></table></figure>
-<p>在项目目录下创建nginx文件my.conf，大概配置如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"># nginx连接的上流模块，地址和uWSGI服务器 地址是一致的</span><br><span class="line">upstream django &#123;</span><br><span class="line">    server 127.0.0.1:8001; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># configuration of the server</span><br><span class="line">server &#123;</span><br><span class="line">    </span><br><span class="line">    listen      7888; # nginx用于与外部通信的端口</span><br><span class="line">    # the domain name it will serve for</span><br><span class="line">    server_name 127.0.0.1; # IP地址或域名，这里我是IP地址，直接将外网的IP地址填入</span><br><span class="line">    charset     utf-8;</span><br><span class="line"></span><br><span class="line">    client_max_body_size 75M;   # 上传文件的最大size</span><br><span class="line"></span><br><span class="line">    # 很重要，指向的是媒体文件夹，一般媒体文件夹用于保存图片、音频等文件</span><br><span class="line">    # django中的媒体文件怎么配置网上很多教程，如果没有媒体文件，可跳过这一项</span><br><span class="line">    # location /media  &#123;</span><br><span class="line">    #    alias /home/ubuntu/EMP_BBS/media;  </span><br><span class="line">    #&#125;</span><br><span class="line">    # 很重要，指向的是静态资源文件夹，一般媒体文件夹用于保存css、js文件</span><br><span class="line">    # django中的媒静态资源文件夹的配置网上很多教程，如果没有静态资源，可跳过这一项</span><br><span class="line">    location /static &#123;</span><br><span class="line">        alias /home/quin/djangotest/static; # your Django project&#x27;s static files - amend as required</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # 对于非静态资源的请求，都通过uWSGI发给Django应用程序进行处理</span><br><span class="line">    location / &#123;</span><br><span class="line">        uwsgi_pass  django;</span><br><span class="line">        include     /etc/nginx/uwsgi_params; # 上面的uwsgi_params文件</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>再通过指令做软连接</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ln -s /myconf /etc/nginx/site-enabled/</span><br></pre></td></tr></table></figure>
-<p>重启nginx</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service nginx restart</span><br></pre></td></tr></table></figure>
-<p>此时访问127.0.0.1:7888即可看到欢迎页，访问&#x2F;admin可见有样式</p>
+<p>后面配置可参考<a target="_blank" rel="noopener" href="https://uwsgi-docs-zh.readthedocs.io/zh-cn/latest/tutorials/Django_and_nginx.html">https://uwsgi-docs-zh.readthedocs.io/zh-cn/latest/tutorials/Django_and_nginx.html</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/27/%E4%BD%BF%E7%94%A8docker%E9%83%A8%E7%BD%B2Django%E8%B8%A9%E5%9D%91/" data-id="clwqgfiqc0001y4hs4worhw3l" data-title="使用docker部署Django踩坑（草稿）" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/27/%E4%BD%BF%E7%94%A8docker%E9%83%A8%E7%BD%B2Django%E8%B8%A9%E5%9D%91/" data-id="clwqgt7to0001vchs43kdbldx" data-title="使用docker部署Django踩坑（草稿）" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -180,7 +168,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/27/hello-world/" data-id="clwqgfiq70000y4hs8hlr98hi" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/27/hello-world/" data-id="clwqgt7tj0000vchs5pob2ou5" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
